@@ -1,5 +1,6 @@
 #!/bin/bash
 # Executes given cargo command across all feature sets
+set -e
 
 # Check if a command is provided
 if [ -z "$1" ]; then

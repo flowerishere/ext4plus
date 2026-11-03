@@ -84,7 +84,10 @@ async fn new_dir_entry(
         FileContent::Dir
     } else {
         let data = fs.read(&path).await?;
-        let hash = format!("{:x}", Sha256::digest(data));
+        let hash = Sha256::digest(data)
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>();
         FileContent::Regular(hash)
     };
     Ok(WalkDirEntry {

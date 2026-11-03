@@ -1226,15 +1226,17 @@ impl Ext4 {
                     self.0.superblock.set_free_blocks_count(total_free_blocks);
                     return Err(err);
                 }
-                if clear
-                    && let Err(err) = self
-                        .clear_blocks_in_transaction(
-                            block_index,
-                            num_blocks,
-                            &mut tx,
-                        )
-                        .await
-                {
+                let clear_result = if clear {
+                    self.clear_blocks_in_transaction(
+                        block_index,
+                        num_blocks,
+                        &mut tx,
+                    )
+                    .await
+                } else {
+                    Ok(())
+                };
+                if let Err(err) = clear_result {
                     bg.set_free_blocks_count(free_blocks);
                     Self::restore_block_bitmap_checksum(
                         bg,

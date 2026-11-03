@@ -540,10 +540,7 @@ fn check_read_only_compat_features(s_feature_ro_compat: u32) -> bool {
         | ReadOnlyCompatibleFeatures::PROJECT_QUOTAS
         | ReadOnlyCompatibleFeatures::BIG_ALLOC;
     let present_disallowed = actual & disallowed_features;
-    if !present_disallowed.is_empty() {
-        return false;
-    }
-    true
+    present_disallowed.is_empty()
 }
 
 #[cfg(test)]

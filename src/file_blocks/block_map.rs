@@ -113,7 +113,7 @@ impl<T: BlockMapEntry> IndirectBlock<T> {
             .checked_mul(4)
             .ok_or(CorruptKind::BlockMap(self.block_index.value()))?;
         if entry_index >= block_data.len() {
-            return Err(CorruptKind::BlockMap(self.block_index.value()))?;
+            return Err(CorruptKind::BlockMap(self.block_index.value()).into());
         }
         let entry_block_index = read_u32le(&block_data, entry_index);
         Ok(T::from_index(BlockIndex(entry_block_index)))
@@ -132,7 +132,7 @@ impl<T: BlockMapEntry> IndirectBlock<T> {
             .checked_mul(4)
             .ok_or(CorruptKind::BlockMap(self.block_index.value()))?;
         if entry_index >= block_data.len() {
-            return Err(CorruptKind::BlockMap(self.block_index.value()))?;
+            return Err(CorruptKind::BlockMap(self.block_index.value()).into());
         }
         block_data[entry_index
             ..entry_index
@@ -209,11 +209,8 @@ impl BlockMap {
 
     pub(crate) fn to_bytes(&self) -> [u8; 15 * 4] {
         let mut data = [0; 15 * 4];
-        for i in 0usize..12 {
-            let start = i.checked_mul(4).unwrap();
-            let end = i.checked_add(1).unwrap().checked_mul(4).unwrap();
-            data[start..end]
-                .copy_from_slice(&self.direct_blocks[i].to_le_bytes());
+        for (dst, block) in data.chunks_exact_mut(4).zip(&self.direct_blocks) {
+            dst.copy_from_slice(&block.to_le_bytes());
         }
         data[DIRECT_BLOCKS * 4..(DIRECT_BLOCKS + 1) * 4].copy_from_slice(
             &self.single_indirect_block.block_index.value().to_le_bytes(),

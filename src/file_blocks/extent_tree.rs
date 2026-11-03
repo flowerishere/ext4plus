@@ -1605,11 +1605,7 @@ impl ExtentTree {
             return false;
         };
         let max_len = if left.is_initialized { 32_768 } else { 32_767 };
-        if combined_len > max_len {
-            return false;
-        }
-
-        true
+        combined_len <= max_len
     }
 
     #[maybe_async::maybe_async]

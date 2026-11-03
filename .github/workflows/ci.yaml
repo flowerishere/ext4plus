@@ -32,21 +32,22 @@ jobs:
           msrv=$(cargo metadata --no-deps --format-version=1 | jq --raw-output '.packages[] | select(.name == "ext4plus") | .rust_version')
 
           rustup toolchain install ${msrv} --profile minimal --no-self-update
-          ./scripts/all_conf.sh +${msrv} build -p ext4plus ${{ matrix.sync-feature }}
+          ./scripts/all_conf.sh +${msrv} build -p ext4plus
 
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: Swatinem/rust-cache@v2
-      - run: ./scripts/all_conf.sh check --workspace $({{ matrix.sync-feature }})
+      - run: ./scripts/all_conf.sh check -p ext4plus
+      - run: cargo check --workspace
 
   clippy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: Swatinem/rust-cache@v2
-      - run: ./scripts/all_conf.sh clippy ${{ matrix.sync-feature }}
+      - run: ./scripts/all_conf.sh clippy -p ext4plus
 
   clippy-workspace:
     runs-on: ubuntu-latest
@@ -152,7 +153,8 @@ jobs:
       - run: rustup install beta
       - run: rustup component add --toolchain beta clippy rustfmt
       - run: rustup default beta
-      - run: ./scripts/all_conf.sh clippy --workspace
+      - run: ./scripts/all_conf.sh clippy -p ext4plus
+      - run: cargo clippy --workspace
       - run: cargo doc -F std
       - run: cargo fmt --all -- --check
       - run: ./scripts/all_conf.sh test -p ext4plus
